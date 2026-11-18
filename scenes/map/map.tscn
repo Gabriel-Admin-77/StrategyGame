@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/map.gd" id="1_map_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/top_bar.tscn" id="2_top_bar_scene"]
@@ -10,6 +10,9 @@
 [ext_resource type="Script" path="res://scripts/core/strategy_camera.gd" id="8_camera_script"]
 [ext_resource type="Script" path="res://scripts/map/terrain_renderer.gd" id="9_terrain_script"]
 [ext_resource type="Script" path="res://scripts/map/selection_overlay.gd" id="10_overlay_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="11_save_dialog"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_dialog.tscn" id="12_settings_dialog"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="13_pause_menu"]
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_map_script")
@@ -51,3 +54,12 @@ offset_left = -400.0
 offset_top = 74.0
 offset_right = -40.0
 offset_bottom = 374.0
+
+[node name="SaveLoadDialog" parent="HUD" instance=ExtResource("11_save_dialog")]
+visible = false
+
+[node name="SettingsDialog" parent="HUD" instance=ExtResource("12_settings_dialog")]
+visible = false
+
+[node name="PauseMenu" parent="HUD" instance=ExtResource("13_pause_menu")]
+visible = false

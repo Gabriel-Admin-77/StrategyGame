@@ -1,17 +1,23 @@
 extends Node
 
 ## StrategyManager - Save Manager
-## Serializes game state (turn, resources, placed buildings, selection) to JSON
-## and restores the complete game session from disk.
+## Serializes game state (turn, resources, placed buildings, selection, timestamp)
+## to versioned JSON files across named slots (Autosave, Slot 1, Slot 2, Slot 3),
+## and restores complete game sessions from disk.
 
 const BuildingType = preload("res://scripts/buildings/building_type.gd")
 
 signal game_saved(filepath: String)
 signal game_loaded(filepath: String)
 signal save_error(message: String)
+signal slot_saved(slot_id: String)
+signal slot_loaded(slot_id: String)
 
 const DEFAULT_SAVE_PATH: String = "user://savegame.json"
+const SAVES_DIR: String = "user://saves"
 const BUILDING_TYPES_PATH: String = "res://resources/building_types"
+
+const SLOTS: Array[String] = ["autosave", "slot_1", "slot_2", "slot_3"]
 
 # Node references (configured automatically in _ready if inside Map)
 @export var map_node: Node2D = null
@@ -26,6 +32,18 @@ var _catalog: Dictionary = {}
 func _ready() -> void:
 	_ensure_catalog()
 	_ensure_references()
+	_ensure_saves_dir()
+
+
+func _ensure_saves_dir() -> void:
+	if not DirAccess.dir_exists_absolute(SAVES_DIR):
+		DirAccess.make_dir_recursive_absolute(SAVES_DIR)
+
+
+## Resolves the file path for a slot identifier
+func get_slot_path(slot_id: String) -> String:
+	_ensure_saves_dir()
+	return SAVES_DIR.path_join("%s.json" % slot_id)
 
 
 ## Loads and indexes all BuildingType resources from disk by their unique id
@@ -65,32 +83,37 @@ func _ensure_references() -> void:
 func save_game(filepath: String = "") -> bool:
 	var target_path: String = filepath if not filepath.is_empty() else DEFAULT_SAVE_PATH
 	_ensure_references()
+	_ensure_saves_dir()
 
-	var save_data: Dictionary = {
-		"version": 2,
-		"turn": turn_manager.get_current_turn() if turn_manager else 1,
-		"resources": resource_manager.get_resources() if resource_manager else {},
-		"buildings": [],
-		"selected_coords": {
-			"x": map_node.selected_coords.x if map_node else -1,
-			"y": map_node.selected_coords.y if map_node else -1
-		}
-	}
-
-	# Serialize placed buildings (including construction state)
+	var placed_count: int = 0
+	var buildings_list: Array = []
 	if building_layer and building_layer.has_method("get_all_buildings"):
 		var placed: Dictionary = building_layer.get_all_buildings()
+		placed_count = placed.size()
 		for coords: Vector2i in placed.keys():
 			var b: BuildingType = placed[coords]
 			var turns_left: int = 0
 			if building_layer.has_method("get_construction_turns_left"):
 				turns_left = building_layer.get_construction_turns_left(coords)
-			save_data["buildings"].append({
+			buildings_list.append({
 				"x": coords.x,
 				"y": coords.y,
 				"id": b.id,
 				"turns_left": turns_left
 			})
+
+	var save_data: Dictionary = {
+		"version": 2,
+		"timestamp": Time.get_datetime_string_from_system(false, true),
+		"turn": turn_manager.get_current_turn() if turn_manager else 1,
+		"resources": resource_manager.get_resources() if resource_manager else {},
+		"buildings_count": placed_count,
+		"buildings": buildings_list,
+		"selected_coords": {
+			"x": map_node.selected_coords.x if map_node else -1,
+			"y": map_node.selected_coords.y if map_node else -1
+		}
+	}
 
 	var json_text: String = JSON.stringify(save_data, "\t")
 	var file: FileAccess = FileAccess.open(target_path, FileAccess.WRITE)
@@ -174,7 +197,82 @@ func load_game(filepath: String = "") -> bool:
 	return true
 
 
-## Checks whether a save file exists
+# -----------------------------------------------------------------------------
+# Multi-Slot API
+# -----------------------------------------------------------------------------
+
+## Saves current game state into the named slot (e.g. "slot_1", "autosave").
+func save_to_slot(slot_id: String) -> bool:
+	var path: String = get_slot_path(slot_id)
+	var success: bool = save_game(path)
+	if success:
+		slot_saved.emit(slot_id)
+	return success
+
+
+## Restores game state from the named slot.
+func load_from_slot(slot_id: String) -> bool:
+	var path: String = get_slot_path(slot_id)
+	var success: bool = load_game(path)
+	if success:
+		slot_loaded.emit(slot_id)
+	return success
+
+
+## Performs an automatic background save to the "autosave" slot.
+func autosave() -> bool:
+	return save_to_slot("autosave")
+
+
+## Checks if an autosave file is present.
+func has_autosave() -> bool:
+	return FileAccess.file_exists(get_slot_path("autosave"))
+
+
+## Returns lightweight preview metadata for a slot without full loading.
+func get_slot_metadata(slot_id: String) -> Dictionary:
+	var path: String = get_slot_path(slot_id)
+	if not FileAccess.file_exists(path):
+		return {
+			"slot_id": slot_id,
+			"exists": false,
+			"timestamp": "",
+			"turn": 0,
+			"resources": {},
+			"buildings_count": 0
+		}
+
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return { "slot_id": slot_id, "exists": false }
+
+	var text: String = file.get_as_text()
+	file.close()
+
+	var json: JSON = JSON.new()
+	if json.parse(text) != OK or not (json.data is Dictionary):
+		return { "slot_id": slot_id, "exists": false, "corrupted": true }
+
+	var d: Dictionary = json.data
+	return {
+		"slot_id": slot_id,
+		"exists": true,
+		"timestamp": str(d.get("timestamp", "Unknown")),
+		"turn": int(d.get("turn", 1)),
+		"resources": d.get("resources", {}),
+		"buildings_count": int(d.get("buildings_count", d.get("buildings", []).size()))
+	}
+
+
+## Returns summary metadata for all standard slots.
+func get_all_slots_summary() -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
+	for s: String in SLOTS:
+		list.append(get_slot_metadata(s))
+	return list
+
+
+## Checks whether a save file exists at a given path
 func has_save(filepath: String = "") -> bool:
 	var target_path: String = filepath if not filepath.is_empty() else DEFAULT_SAVE_PATH
 	return FileAccess.file_exists(target_path)

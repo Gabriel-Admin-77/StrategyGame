@@ -202,6 +202,10 @@ func _on_turn_advanced(_new_turn: int) -> void:
 		if not upkeep_costs.is_empty():
 			resource_manager.deduct_upkeep(upkeep_costs)
 
+	# 6. Background autosave
+	if save_manager and save_manager.has_method("autosave"):
+		save_manager.autosave()
+
 
 ## Returns the terrain display name for the given tile coordinates
 func get_terrain_name(coords: Vector2i) -> String:

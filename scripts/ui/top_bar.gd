@@ -6,6 +6,7 @@ extends PanelContainer
 signal end_turn_requested
 signal save_requested
 signal load_requested
+signal menu_requested
 
 const PaintedTheme = preload("res://scripts/ui/painted_theme.gd")
 
@@ -17,6 +18,7 @@ const PaintedTheme = preload("res://scripts/ui/painted_theme.gd")
 @onready var status_label: Label = get_node_or_null("MarginContainer/HBoxContainer/StatusLabel")
 @onready var save_button: Button = get_node_or_null("MarginContainer/HBoxContainer/SaveButton")
 @onready var load_button: Button = get_node_or_null("MarginContainer/HBoxContainer/LoadButton")
+@onready var menu_button: Button = get_node_or_null("MarginContainer/HBoxContainer/MenuButton")
 @onready var end_turn_button: Button = get_node_or_null("MarginContainer/HBoxContainer/EndTurnButton")
 
 var _status_timer: SceneTreeTimer = null
@@ -31,6 +33,8 @@ func _ready() -> void:
 		save_button.pressed.connect(_on_save_pressed)
 	if load_button:
 		load_button.pressed.connect(_on_load_pressed)
+	if menu_button:
+		menu_button.pressed.connect(_on_menu_pressed)
 
 
 func _ensure_references() -> void:
@@ -43,6 +47,7 @@ func _ensure_references() -> void:
 		status_label = get_node_or_null("MarginContainer/HBoxContainer/StatusLabel")
 		save_button = get_node_or_null("MarginContainer/HBoxContainer/SaveButton")
 		load_button = get_node_or_null("MarginContainer/HBoxContainer/LoadButton")
+		menu_button = get_node_or_null("MarginContainer/HBoxContainer/MenuButton")
 		end_turn_button = get_node_or_null("MarginContainer/HBoxContainer/EndTurnButton")
 
 
@@ -56,6 +61,10 @@ func _on_save_pressed() -> void:
 
 func _on_load_pressed() -> void:
 	load_requested.emit()
+
+
+func _on_menu_pressed() -> void:
+	menu_requested.emit()
 
 
 func update_turn(turn_num: int) -> void:
