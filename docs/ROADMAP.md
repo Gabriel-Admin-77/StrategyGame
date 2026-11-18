@@ -23,13 +23,14 @@ Status legend: `[x]` done · `[~]` in progress · `[ ]` planned
 - [x] Painted UI theme and resource icons.
 - [x] Phase 1 validation tests + screenshots.
 
-## Phase 2 — Economy depth (current)
+## Phase 2 — Economy depth
 
-- Terrain yields actually generate income.
-- Construction time (`build_turns`), demolition refund, upkeep, storage caps.
-- Additional buildings: house, market, mine, quarry, dock.
+- [x] Terrain yields actually generate income (worked tiles by completed buildings).
+- [x] Construction time (`build_turns`), demolition refund (50%), upkeep, storage caps.
+- [x] Additional buildings: house, market, mine, dock (with painterly artwork & `.tres`).
+- [x] Complete economy depth verification test suite (`tests/test_economy_depth.gd`).
 
-## Phase 3 — Save/load and application shell
+## Phase 3 — Save/load and application shell (current)
 
 - Versioned save schema with migrations (v1 exists: turn, resources, buildings, selection).
 - Autosave each turn, multiple slots, main menu, settings (audio, UI scale, hotkeys).

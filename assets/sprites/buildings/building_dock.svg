@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Painterly Dock -->
+  <defs>
+    <linearGradient id="water_bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f86b8"/>
+      <stop offset="100%" stop-color="#1d4f78"/>
+    </linearGradient>
+    <linearGradient id="plank" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a08050"/>
+      <stop offset="100%" stop-color="#7a5a30"/>
+    </linearGradient>
+  </defs>
+  <!-- Water base -->
+  <rect x="10" y="120" width="172" height="62" rx="6" fill="url(#water_bg)" opacity="0.5"/>
+  <!-- Wave strokes -->
+  <path d="M20,150 Q45,142 70,150 Q95,158 120,150 Q145,142 170,150" fill="none" stroke="#cfe8ef" stroke-width="1.5" opacity="0.6"/>
+  <path d="M15,164 Q40,156 65,164 Q90,172 115,164 Q140,156 165,164" fill="none" stroke="#cfe8ef" stroke-width="1" opacity="0.4"/>
+  <!-- Dock platform -->
+  <rect x="30" y="100" width="132" height="12" rx="2" fill="url(#plank)" stroke="#5a3a1a" stroke-width="1.5"/>
+  <!-- Planks -->
+  <line x1="50" y1="100" x2="50" y2="112" stroke="#5a3a1a" stroke-width="0.8"/>
+  <line x1="75" y1="100" x2="75" y2="112" stroke="#5a3a1a" stroke-width="0.8"/>
+  <line x1="100" y1="100" x2="100" y2="112" stroke="#5a3a1a" stroke-width="0.8"/>
+  <line x1="125" y1="100" x2="125" y2="112" stroke="#5a3a1a" stroke-width="0.8"/>
+  <!-- Support pillars -->
+  <rect x="42" y="108" width="8" height="52" fill="#6b4f30" stroke="#4a3018" stroke-width="1"/>
+  <rect x="90" y="108" width="8" height="48" fill="#6b4f30" stroke="#4a3018" stroke-width="1"/>
+  <rect x="140" y="108" width="8" height="52" fill="#6b4f30" stroke="#4a3018" stroke-width="1"/>
+  <!-- Small shed/warehouse on dock -->
+  <rect x="58" y="68" width="44" height="34" rx="2" fill="#c4a67a" stroke="#6b4f30" stroke-width="1.5"/>
+  <polygon points="52,72 80,48 108,72" fill="#8b5a3a" stroke="#5a3a1a" stroke-width="1.5"/>
+  <!-- Boat -->
+  <path d="M120,92 Q136,82 150,92 L148,98 Q136,90 122,98 Z" fill="#a06030" stroke="#5a3a1a" stroke-width="1"/>
+  <!-- Fishing net -->
+  <path d="M128,86 L134,70 L140,86" fill="none" stroke="#888" stroke-width="1"/>
+  <line x1="130" y1="78" x2="138" y2="78" stroke="#888" stroke-width="0.8"/>
+  <!-- Rope -->
+  <path d="M102,100 Q108,90 112,94" fill="none" stroke="#8a7358" stroke-width="1.5"/>
+</svg>

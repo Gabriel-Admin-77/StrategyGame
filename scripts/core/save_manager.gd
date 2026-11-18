@@ -67,7 +67,7 @@ func save_game(filepath: String = "") -> bool:
 	_ensure_references()
 
 	var save_data: Dictionary = {
-		"version": 1,
+		"version": 2,
 		"turn": turn_manager.get_current_turn() if turn_manager else 1,
 		"resources": resource_manager.get_resources() if resource_manager else {},
 		"buildings": [],
@@ -77,15 +77,19 @@ func save_game(filepath: String = "") -> bool:
 		}
 	}
 
-	# Serialize placed buildings
+	# Serialize placed buildings (including construction state)
 	if building_layer and building_layer.has_method("get_all_buildings"):
 		var placed: Dictionary = building_layer.get_all_buildings()
 		for coords: Vector2i in placed.keys():
 			var b: BuildingType = placed[coords]
+			var turns_left: int = 0
+			if building_layer.has_method("get_construction_turns_left"):
+				turns_left = building_layer.get_construction_turns_left(coords)
 			save_data["buildings"].append({
 				"x": coords.x,
 				"y": coords.y,
-				"id": b.id
+				"id": b.id,
+				"turns_left": turns_left
 			})
 
 	var json_text: String = JSON.stringify(save_data, "\t")
@@ -142,7 +146,7 @@ func load_game(filepath: String = "") -> bool:
 	if resource_manager and data.has("resources"):
 		resource_manager.set_resources(data["resources"])
 
-	# 3. Restore Buildings
+	# 3. Restore Buildings (with construction state for v2+)
 	if building_layer:
 		building_layer.clear_all()
 		if data.has("buildings") and data["buildings"] is Array:
@@ -151,7 +155,11 @@ func load_game(filepath: String = "") -> bool:
 				var b_id: String = str(entry.get("id", ""))
 				var b_type: BuildingType = _catalog.get(b_id, null)
 				if b_type != null:
-					building_layer.place_building(coords, b_type)
+					var turns_left: int = int(entry.get("turns_left", 0))
+					if building_layer.has_method("place_building_with_state") and turns_left > 0:
+						building_layer.place_building_with_state(coords, b_type, turns_left)
+					else:
+						building_layer.place_building(coords, b_type)
 
 	# 4. Restore Selection & Update UI
 	if map_node and data.has("selected_coords"):

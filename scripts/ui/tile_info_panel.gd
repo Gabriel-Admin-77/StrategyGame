@@ -77,7 +77,10 @@ func display_tile(coords: Vector2i, info: Dictionary, building_param: BuildingTy
 
 	if building != null:
 		if building_label:
-			building_label.text = "Building: %s (%s)" % [building.display_name, building.get_production_text()]
+			var construction_note: String = ""
+			if info.has("construction_turns_left") and info["construction_turns_left"] > 0:
+				construction_note = " [Building: %d turns left]" % info["construction_turns_left"]
+			building_label.text = "Building: %s (%s)%s" % [building.display_name, building.get_production_text(), construction_note]
 			building_label.modulate = Color(0.95, 0.85, 0.45)
 		if buildable_label:
 			buildable_label.text = "Buildable: No (occupied)"

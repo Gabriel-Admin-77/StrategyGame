@@ -52,18 +52,24 @@ func _run_test() -> void:
 		_finish()
 		return
 
-	# Farm, Lumber Mill, Workshop (sorted by name) + Demolish
+	# Building buttons (sorted by name) + Demolish button at the end
 	var buttons: Array = container.get_children()
 	var labels: PackedStringArray = PackedStringArray()
+	var farm_button: Button = null
+	var demolish_button: Button = null
 	for button: Node in buttons:
-		labels.append(button.text)
+		if button is Button:
+			labels.append(button.text)
+			if button.text == "Farm":
+				farm_button = button
+			elif button.text == "Demolish":
+				demolish_button = button
 	print("Palette buttons: ", labels)
-	_check(buttons.size() == 4, "palette builds 4 buttons (3 buildings + Demolish), got %d" % buttons.size())
-	_check(labels.size() == 4 and labels[0] == "Farm", "first building button is Farm")
-	_check(labels.size() == 4 and labels[3] == "Demolish", "last button is Demolish")
-
-	var farm_button: Button = buttons[0]
-	var demolish_button: Button = buttons[3]
+	_check(buttons.size() >= 4, "palette builds buttons (got %d)" % buttons.size())
+	_check(labels.has("Farm"), "palette contains Farm button")
+	_check(labels[labels.size() - 1] == "Demolish", "last button is Demolish")
+	_check(farm_button != null, "Farm button found")
+	_check(demolish_button != null, "Demolish button found")
 
 	# Pressing a building button must arm build mode through the scene connection
 	farm_button.button_pressed = true

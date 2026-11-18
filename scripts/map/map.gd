@@ -42,6 +42,7 @@ const TERRAIN_DATA: Dictionary = {
 	TerrainType.PLAINS: {
 		"name": "Plains",
 		"color": COLOR_PLAINS,
+		"yields": { "food": 2 },
 		"yield_desc": "+2 Food per turn",
 		"can_build": true,
 		"description": "Fertile open land ideal for farms and settlements."
@@ -49,6 +50,7 @@ const TERRAIN_DATA: Dictionary = {
 	TerrainType.FOREST: {
 		"name": "Forest",
 		"color": COLOR_FOREST,
+		"yields": { "wood": 2 },
 		"yield_desc": "+2 Wood per turn",
 		"can_build": true,
 		"description": "Dense woodlands rich in lumber and natural cover."
@@ -56,18 +58,23 @@ const TERRAIN_DATA: Dictionary = {
 	TerrainType.WATER: {
 		"name": "Water",
 		"color": COLOR_WATER,
-		"yield_desc": "Fish & Waterway",
+		"yields": { "food": 1, "gold": 1 },
+		"yield_desc": "+1 Food, +1 Gold per turn",
 		"can_build": false,
 		"description": "Deep water. Cannot support standard ground buildings."
 	},
 	TerrainType.MOUNTAIN: {
 		"name": "Mountain",
 		"color": COLOR_MOUNTAIN,
-		"yield_desc": "+2 Iron / Stone per turn",
+		"yields": { "gold": 2 },
+		"yield_desc": "+2 Gold per turn",
 		"can_build": false,
 		"description": "Rugged, impassable peaks rich in mineral veins."
 	}
 }
+
+## Ratio of original cost refunded when a building is demolished.
+const DEMOLITION_REFUND_RATIO: float = 0.5
 
 # 10x10 Data-driven terrain map layout
 var terrain_grid: Array = [
@@ -161,13 +168,39 @@ func _setup_system_connections() -> void:
 		top_bar.update_turn(turn_manager.get_current_turn())
 
 
-## Handles per-turn resource generation from base income and placed buildings
+## Handles per-turn resource generation:
+## 1. Advance construction on all buildings under construction.
+## 2. Award base income.
+## 3. Add terrain yields from worked tiles (tiles with completed buildings).
+## 4. Add building production from completed buildings.
+## 5. Deduct upkeep from completed buildings.
 func _on_turn_advanced(_new_turn: int) -> void:
+	# 1. Advance construction pipeline
+	if building_layer and building_layer.has_method("advance_construction"):
+		var just_completed: Array = building_layer.advance_construction()
+		if top_bar and not just_completed.is_empty():
+			var names: PackedStringArray = PackedStringArray()
+			for c: Vector2i in just_completed:
+				var b: BuildingType = get_building_at(c)
+				if b:
+					names.append(b.display_name)
+			top_bar.show_status_message("%s completed!" % ", ".join(names), Color(0.4, 0.9, 0.4))
+
 	if resource_manager:
+		# 2. Base income
 		resource_manager.process_turn_income()
+		# 3. Terrain yields from worked tiles
+		var terrain_income: Dictionary = get_worked_terrain_yields()
+		if not terrain_income.is_empty():
+			resource_manager.add_resources(terrain_income)
+		# 4. Building production (completed only)
 		var building_income: Dictionary = get_building_income()
 		if not building_income.is_empty():
 			resource_manager.add_resources(building_income)
+		# 5. Upkeep costs (completed only)
+		var upkeep_costs: Dictionary = get_building_upkeep()
+		if not upkeep_costs.is_empty():
+			resource_manager.deduct_upkeep(upkeep_costs)
 
 
 ## Returns the terrain display name for the given tile coordinates
@@ -193,7 +226,9 @@ func can_place_building(coords: Vector2i, building: BuildingType) -> bool:
 		return false
 	var terrain: TerrainType = terrain_grid[coords.y][coords.x]
 	var terrain_info: Dictionary = TERRAIN_DATA[terrain]
-	if not terrain_info.get("can_build", false):
+	var is_buildable_terrain: bool = terrain_info.get("can_build", false)
+	# Specialized structures (e.g. Dock on Water or Mine on Mountain) are permitted if explicitly listed in allowed_terrain_names
+	if not is_buildable_terrain and not building.allowed_terrain_names.has(terrain_info["name"]):
 		return false
 	if not building.is_terrain_allowed(terrain_info["name"]):
 		return false
@@ -210,7 +245,8 @@ func get_placement_error(coords: Vector2i, building: BuildingType) -> String:
 		return "Target tile is out of map boundaries."
 	var terrain: TerrainType = terrain_grid[coords.y][coords.x]
 	var terrain_info: Dictionary = TERRAIN_DATA[terrain]
-	if not terrain_info.get("can_build", false):
+	var is_buildable_terrain: bool = terrain_info.get("can_build", false)
+	if not is_buildable_terrain and not building.allowed_terrain_names.has(terrain_info["name"]):
 		return "%s cannot support buildings." % terrain_info["name"]
 	if not building.is_terrain_allowed(terrain_info["name"]):
 		return "%s requires %s (found %s)." % [building.display_name, building.get_allowed_terrain_text(), terrain_info["name"]]
@@ -243,11 +279,20 @@ func place_building(coords: Vector2i, building: BuildingType) -> bool:
 	return true
 
 
-## Removes a building from the specified tile
+## Removes a building from the specified tile and refunds part of the cost.
 func demolish_building(coords: Vector2i) -> bool:
 	if building_layer == null or not building_layer.is_occupied(coords):
 		return false
 	var building: BuildingType = building_layer.get_building_at(coords)
+	# Refund a portion of the original cost
+	if resource_manager and not building.cost.is_empty():
+		var refund: Dictionary = {}
+		for res_name: String in building.cost:
+			var amount: int = int(building.cost[res_name] * DEMOLITION_REFUND_RATIO)
+			if amount > 0:
+				refund[res_name] = amount
+		if not refund.is_empty():
+			resource_manager.add_resources(refund)
 	building_layer.remove_building(coords)
 	building_removed.emit(coords, building)
 	_update_tile_info(coords)
@@ -273,16 +318,44 @@ func clear_build_modes() -> void:
 	demolish_mode = false
 
 
-## Sums resource production across all currently active buildings
+## Sums resource production across all completed (not under construction) buildings
 func get_building_income() -> Dictionary:
 	var income: Dictionary = {}
 	if building_layer == null:
 		return income
-	var all_buildings: Dictionary = building_layer.get_all_buildings()
-	for b: BuildingType in all_buildings.values():
+	var completed: Dictionary = building_layer.get_completed_buildings()
+	for b: BuildingType in completed.values():
 		for res_name: String in b.production:
 			income[res_name] = income.get(res_name, 0) + b.production[res_name]
 	return income
+
+
+## Returns the sum of terrain yields for every tile that has a completed building.
+func get_worked_terrain_yields() -> Dictionary:
+	var yields: Dictionary = {}
+	if building_layer == null:
+		return yields
+	var completed: Dictionary = building_layer.get_completed_buildings()
+	for coords: Vector2i in completed:
+		if coords.x < 0 or coords.x >= GRID_WIDTH or coords.y < 0 or coords.y >= GRID_HEIGHT:
+			continue
+		var terrain: TerrainType = terrain_grid[coords.y][coords.x]
+		var terrain_yields: Dictionary = TERRAIN_DATA[terrain].get("yields", {})
+		for res_name: String in terrain_yields:
+			yields[res_name] = yields.get(res_name, 0) + terrain_yields[res_name]
+	return yields
+
+
+## Sums upkeep costs across all completed buildings.
+func get_building_upkeep() -> Dictionary:
+	var costs: Dictionary = {}
+	if building_layer == null:
+		return costs
+	var completed: Dictionary = building_layer.get_completed_buildings()
+	for b: BuildingType in completed.values():
+		for res_name: String in b.upkeep:
+			costs[res_name] = costs.get(res_name, 0) + b.upkeep[res_name]
+	return costs
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -368,6 +441,8 @@ func _update_tile_info(coords: Vector2i) -> void:
 	var info: Dictionary = TERRAIN_DATA.get(terrain, {}).duplicate()
 	var building: BuildingType = get_building_at(coords)
 	info["building"] = building
+	if building_layer and building_layer.has_method("get_construction_turns_left"):
+		info["construction_turns_left"] = building_layer.get_construction_turns_left(coords)
 
 	tile_selected.emit(coords, info)
 	if tile_info_panel and tile_info_panel.has_method("display_tile"):

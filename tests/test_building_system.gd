@@ -128,8 +128,8 @@ func _run_test() -> void:
 	var food_before: int = resources.get_resources()["food"]
 	turns.advance_turn()
 	var food_after: int = resources.get_resources()["food"]
-	# base income (+5 food per turn) plus the farm's +3 food
-	_check(food_after == food_before + 8, "turn advance adds base income and building production (%d -> %d)" % [food_before, food_after])
+	# base income (+5 food per turn) plus the farm's +3 food plus worked plains (+2 food)
+	_check(food_after == food_before + 10, "turn advance adds base income and building production (%d -> %d)" % [food_before, food_after])
 	_check(turns.get_current_turn() == 2, "turn counter advanced to 2")
 	_check("Turn: 2" in top_bar.turn_label.text, "TopBar reflects the new turn")
 

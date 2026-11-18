@@ -26,7 +26,9 @@ extends Resource
 @export var cost: Dictionary = {}
 ## Per-turn production, e.g. { "food": 3 }. Consumed by the economy phase.
 @export var production: Dictionary = {}
-## Turns needed to finish construction (1 = available immediately).
+## Per-turn upkeep deducted while the building is active, e.g. { "gold": 1 }.
+@export var upkeep: Dictionary = {}
+## Turns needed to finish construction (1 = instant).
 @export var build_turns: int = 1
 
 

@@ -76,11 +76,24 @@ func update_coordinates(coords: Vector2i, _info: Dictionary = {}) -> void:
 func update_resources(res: Dictionary) -> void:
 	_ensure_references()
 	if gold_label:
-		gold_label.text = "Gold: %d" % res.get("gold", 0)
+		gold_label.text = "Gold: %d/%d" % [res.get("gold", 0), _get_cap("gold")]
 	if wood_label:
-		wood_label.text = "Wood: %d" % res.get("wood", 0)
+		wood_label.text = "Wood: %d/%d" % [res.get("wood", 0), _get_cap("wood")]
 	if food_label:
-		food_label.text = "Food: %d" % res.get("food", 0)
+		food_label.text = "Food: %d/%d" % [res.get("food", 0), _get_cap("food")]
+
+
+## Looks up the effective capacity from the ResourceManager living in the same map.
+func _get_cap(res_name: String) -> int:
+	var map_node = get_parent()
+	while map_node != null:
+		var rm = map_node.get_node_or_null("ResourceManager") if map_node is Node else null
+		if rm != null and rm.has_method("get_capacity"):
+			return rm.get_capacity(res_name)
+		map_node = map_node.get_parent()
+	# Fallback defaults if ResourceManager is unreachable
+	var defaults: Dictionary = { "gold": 250, "wood": 150, "food": 100 }
+	return defaults.get(res_name, 9999)
 
 
 ## Shows a temporary notification badge on the top bar

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building_type.gd" id="1_building_type"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/building_dock.svg" id="2_art"]
+
+[resource]
+script = ExtResource("1_building_type")
+id = "dock"
+display_name = "Dock"
+description = "Harbor on the water for fishing and trade."
+short_code = "D"
+color = Color(0.25, 0.55, 0.75, 1)
+world_texture = ExtResource("2_art")
+ui_icon = ExtResource("2_art")
+visual_scale = 1.35
+allowed_terrain_names = PackedStringArray("Water")
+cost = {"gold": 45, "wood": 40}
+production = {"food": 3, "gold": 2}
+upkeep = {}
+build_turns = 2
