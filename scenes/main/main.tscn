@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/map/map.tscn" id="1_map_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/building_palette.tscn" id="2_palette_scene"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Map" parent="." instance=ExtResource("1_map_scene")]
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="BuildingPalette" parent="UILayer" instance=ExtResource("2_palette_scene")]
+
+[connection signal="building_mode_selected" from="UILayer/BuildingPalette" to="Map" method="set_pending_building"]
+[connection signal="demolish_mode_selected" from="UILayer/BuildingPalette" to="Map" method="set_demolish_mode"]
+[connection signal="build_mode_cleared" from="UILayer/BuildingPalette" to="Map" method="clear_build_modes"]
+[connection signal="building_placed" from="Map" to="UILayer/BuildingPalette" method="show_confirmation"]
+[connection signal="placement_failed" from="Map" to="UILayer/BuildingPalette" method="show_status"]

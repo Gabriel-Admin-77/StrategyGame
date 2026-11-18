@@ -1,0 +1,24 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Exported builds and packages
+/builds/
+/export/
+*.pck
+
+# Local save data produced while playtesting
+/saves/*.json
+/saves/*.save
+
+# Test artefacts
+/tests/screenshots/
+/tests/output/
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.tmp
+*.log

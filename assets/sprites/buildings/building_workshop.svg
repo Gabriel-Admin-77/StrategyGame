@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+<defs>
+<linearGradient id="stone" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c3bcae"/><stop offset="100%" stop-color="#837b6d"/></linearGradient>
+<linearGradient id="wood" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b7935f"/><stop offset="100%" stop-color="#7c5a35"/></linearGradient>
+<linearGradient id="roof" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5f7d8c"/><stop offset="100%" stop-color="#39505c"/></linearGradient>
+</defs>
+<ellipse cx="96" cy="176" rx="74" ry="14" fill="#1f1710" opacity="0.25"/>
+<rect x="54" y="122" width="84" height="38" rx="3" fill="url(#stone)"/>
+<rect x="54" y="122" width="84" height="38" rx="3" fill="none" stroke="#5d574c" stroke-width="3" opacity="0.7"/>
+<rect x="62" y="96" width="68" height="30" rx="3" fill="url(#wood)"/>
+<rect x="62" y="96" width="68" height="30" rx="3" fill="none" stroke="#5a4028" stroke-width="3" opacity="0.7"/>
+<polygon points="54,98 96,70 140,98" fill="url(#roof)"/>
+<polygon points="54,98 96,70 140,98" fill="none" stroke="#25363f" stroke-width="3"/>
+<rect x="118" y="58" width="16" height="42" rx="2" fill="#9a9387"/>
+<rect x="118" y="58" width="16" height="42" rx="2" fill="none" stroke="#5d574c" stroke-width="2" opacity="0.7"/>
+<g fill="#e9e4da" opacity="0.7">
+<circle cx="126" cy="46" r="9"/><circle cx="138" cy="34" r="11"/><circle cx="154" cy="24" r="13"/>
+</g>
+<rect x="88" y="136" width="20" height="24" fill="#5f4a30"/>
+<circle cx="103" cy="148" r="1.8" fill="#e6cf9b"/>
+<rect x="64" y="130" width="14" height="12" rx="2" fill="#f0d9a4" opacity="0.9"/>
+<rect x="114" y="130" width="14" height="12" rx="2" fill="#f0d9a4" opacity="0.9"/>
+<g>
+<path d="M140 150 l18 0 l-4 -10 l-10 0 z" fill="#4b4b45"/>
+<path d="M136 151 l28 0 l0 4 l-28 0 z" fill="#383833"/>
+<path d="M150 140 l6 -8" stroke="#383833" stroke-width="3" stroke-linecap="round"/>
+</g>
+<path d="M58 98 q34 -18 68 -2" stroke="#f0e3c8" stroke-width="4" fill="none" opacity="0.4" stroke-linecap="round"/>
+<g stroke="#6f6659" stroke-width="2" opacity="0.45">
+<path d="M62 132 l0 0"/><path d="M58 142 q14 4 26 0"/><path d="M112 146 q14 4 24 0"/>
+</g>
+</svg>

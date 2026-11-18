@@ -1,0 +1,288 @@
+Understood. The decisions are now locked:
+
+- **Art style:** full-color **painterly/storybook**, with textured brushwork and rich color—not pixel art or flat geometric tiles.
+- **Scope:** **full 4X**—exploration, expansion, exploitation, and extermination, including units, fog of war, procedural maps, combat, AI opponents, research, and victory conditions.
+- **Immediate execution:** **Phase 0 and Phase 1**, with later phases untouched for now.
+
+Two current-environment facts affect execution:
+
+1. **Git is not installed/on `PATH`**, so Phase 0 must include locating or setting up Git.
+2. A `scripts/core/save_manager.gd` and save/load UI now exist from the parallel work. Phase 0 will preserve and test them rather than treating save/load as unimplemented.
+
+No files have been changed during this planning step.
+
+---
+
+# Phase 0 — Stabilization and Verification
+
+## 0.1 Establish a clean baseline
+
+- Stop or finish the other editing session before modifying files.
+- Inventory all current scripts, scenes, resources, and tests.
+- Run every existing test individually and record:
+  - Pass/fail status.
+  - Script errors and warnings.
+  - Missing resources.
+  - Whether the main scene starts successfully.
+- Preserve the new save/load work and include it in the baseline.
+- Create a timestamped source backup before structural changes.
+
+## 0.2 Set up version control
+
+Because `git` is unavailable:
+
+1. Check common installation locations for an existing Git executable.
+2. If none exists, use a portable Git installation that does not require administrator access.
+3. Initialize the repository in:
+   `e:\Godot_v4.7.2-stable_win64.exe\strategy-game`
+4. Expand `.gitignore` for:
+   - `.godot/`
+   - Exported builds.
+   - Test screenshots and temporary output.
+   - Save files created during testing.
+   - OS/editor temporary files.
+5. Keep the existing LF normalization in `.gitattributes`.
+6. Make an initial baseline commit once tests pass.
+
+The timestamped backup remains a fallback; version control will not be silently skipped.
+
+## 0.3 Create a unified test runner
+
+Add `tests/run_tests.ps1` with:
+
+- Automatic Godot executable detection, plus an optional explicit path parameter.
+- Discovery of every `tests/test_*.gd`.
+- Sequential execution to avoid `.godot` cache contention.
+- Per-test output, duration, and exit code.
+- Final `passed/failed` summary.
+- Nonzero exit code if any suite fails.
+- A separate main-scene smoke run.
+- Optional `--low-gfx` propagation for later rendering tests.
+
+## 0.4 Standardize the tests
+
+Migrate the older `assert()` suites to the same explicit `_check()`/`_finish()` pattern used by the newer suites:
+
+- `test_panel_integration.gd`
+- `test_economy_turn.gd`
+
+Add coverage for the current save/load implementation if it is functional. If it is incomplete, mark it clearly as in-progress rather than rewriting it blindly.
+
+## 0.5 Add project documentation
+
+Create:
+
+- `docs/ROADMAP.md` — the complete full-4X plan and current phase status.
+- `docs/ART_BIBLE.md` — painterly visual rules, palette, dimensions, lighting, and UI style.
+- `docs/TESTING.md` — how to run the complete suite and add new tests.
+- `assets/ATTRIBUTION.md` — asset and font source/license tracking.
+
+### Phase 0 completion criteria
+
+- One command runs all tests and returns a reliable result.
+- Main scene launches without errors.
+- Existing map, building, economy, turn, UI, and save behavior is preserved.
+- Documentation exists in the repository.
+- A clean baseline commit exists.
+
+---
+
+# Phase 1 — Painterly Graphics Foundation
+
+## 1.1 Painterly art direction
+
+The visual target will be a colorful illustrated strategy map:
+
+- Gouache/watercolor-inspired color variation.
+- Soft, textured brush strokes and subtle canvas grain.
+- Rich but controlled saturation.
+- Lighting consistently from the upper left.
+- Soft lower-right shadows.
+- Avoid heavy black outlines and flat single-color tiles.
+- Terrain must remain identifiable by **shape and pattern**, not hue alone.
+
+Proposed terrain treatment:
+
+| Terrain | Painted treatment | Non-color identifier |
+|---|---|---|
+| Plains | Warm greens, ochre highlights, grass strokes | Small grass and flower marks |
+| Forest | Layered emerald/olive canopies with deep shadows | Distinct painted tree clusters |
+| Water | Teal/blue washes with reflected highlights | Curved wave and foam strokes |
+| Mountain | Slate, umber, and warm stone highlights | Angular painted rock facets |
+
+The first assets will be original painterly-style placeholders or suitably licensed painted assets. They will use final asset paths so better commissioned or CC0 artwork can replace them later without renderer changes.
+
+## 1.2 Asset specifications and import rules
+
+Logical tiles remain **64×64**, preserving gameplay coordinates and tests.
+
+- Terrain source artwork: **128×128** per tile.
+- Building illustrations: transparent source images, approximately **192×192**.
+- Resource/UI icons: **64×64**, displayed at 24–32 pixels.
+- Multiple plains, forest, water, and mountain variants.
+- Linear texture filtering and mipmaps for zoomable world art.
+- No nearest-neighbor/pixel-art import settings.
+- Atlas padding to prevent painted-edge bleeding at lower mip levels.
+
+Suggested structure:
+
+```text
+assets/
+  sprites/
+    terrain/
+    buildings/
+    units/
+    ui/
+    fx/
+  fonts/
+  sounds/
+resources/
+  tilesets/
+  ui/
+docs/
+```
+
+## 1.3 Replace procedural terrain rendering
+
+Add a dedicated `TerrainRenderer` while keeping `map.gd` authoritative for gameplay data.
+
+Planned rendering structure:
+
+```text
+Map
+├── ResourceManager
+├── TurnManager
+├── TerrainRenderer
+│   ├── GroundLayer
+│   ├── TransitionLayer
+│   └── DecorationLayer
+├── BuildingLayer
+└── SelectionOverlay
+```
+
+Implementation details:
+
+- Use `TileMapLayer` and a painted `TileSet`.
+- Add terrain variants selected deterministically from coordinates and map seed.
+- Add neighbor-aware transitions:
+  - Grass-to-water shorelines.
+  - Forest edges.
+  - Mountain/cliff boundaries.
+- Add restrained decorative details such as flowers, stones, canopy highlights, and foam.
+- Never use unseeded per-frame randomness.
+- Preserve the existing procedural renderer as a `--low-gfx` fallback for tests and low-end machines.
+
+## 1.4 Upgrade building presentation
+
+Extend `BuildingType` with optional visual fields:
+
+- World texture.
+- UI icon.
+- Construction/scaffold texture for later phases.
+- Visual offset and scale if needed.
+
+Preserve all existing `BuildingLayer` occupancy and placement APIs. Replace only the colored marker rendering with building view nodes:
+
+- Painted Farm, Lumber Mill, and Workshop illustrations.
+- Correct placement within the 64×64 logical tile.
+- Subtle shadow treatment.
+- Existing short-code fallback when a texture is missing.
+- Selection and placement overlays remain above building artwork.
+
+## 1.5 Add camera movement without moving the HUD
+
+Add `Camera2D` functionality:
+
+- Mouse-wheel zoom toward the cursor.
+- Clamped zoom range.
+- Middle-mouse drag panning.
+- WASD/arrow-key panning.
+- Smooth camera interpolation.
+- Map-boundary clamping.
+- Home/reset-camera shortcut.
+- UI clicks must not pan the map or place buildings.
+
+This requires a scene-structure correction: `TopBar` and `TileInfoPanel` currently live under `Map`, so a camera would move and scale them with the world. They will be moved into a dedicated HUD `CanvasLayer`.
+
+Planned structure:
+
+```text
+Main
+├── Map
+├── WorldCamera
+└── UILayer
+    └── GameHUD
+        ├── TopBar
+        ├── TileInfoPanel
+        └── BuildingPalette
+```
+
+A small HUD binding script will connect map signals to UI controls. Tests that currently assume `Map/TopBar` or `Map/TileInfoPanel` will be updated to use the new HUD paths. Save/load/end-turn signals will remain connected.
+
+## 1.6 Painterly UI theme and icons
+
+Create a shared UI theme with:
+
+- Warm parchment-style panels.
+- Dark wood/bronze borders.
+- Muted navy or forest-green secondary surfaces.
+- Gold accents for selection and important actions.
+- Legible body font and a complementary title font, with licenses recorded.
+- Consistent button hover, pressed, disabled, and focus states.
+- Painted gold, wood, food, hammer, save, and load icons replacing emoji.
+- Responsive anchors and containers instead of fixed coordinates.
+
+Verify layouts at minimum at:
+
+- 1120×820.
+- 1280×720.
+- 1600×900.
+
+## 1.7 Phase 1 validation
+
+Add focused tests for:
+
+- Every terrain cell receiving valid visual data.
+- Deterministic terrain variants and decorations.
+- Missing-texture fallback behavior.
+- Building type texture/icon loading.
+- Camera zoom and boundary clamps.
+- Screen-to-map coordinate consistency after zooming and panning.
+- HUD signal wiring after the scene reorganization.
+- Main scene startup with no missing resources.
+- All previous gameplay tests under `--low-gfx`.
+
+Also capture windowed screenshots of fixed map states for visual review; headless tests will validate behavior, while screenshots will validate appearance.
+
+### Phase 1 completion criteria
+
+- The game displays painterly terrain rather than flat colored rectangles.
+- Terrain has variants and readable transitions.
+- Buildings use painted illustrations with safe fallbacks.
+- The camera zooms and pans while the HUD remains stationary.
+- UI uses a coherent painterly theme and real icons.
+- All tests pass through the unified runner.
+- No clipping at supported window sizes.
+- Typical map rendering remains smooth at the target frame rate.
+- Phase 1 is committed separately from Phase 0.
+
+---
+
+# Full-4X Roadmap After Phase 1
+
+These remain planned but will not be implemented during this execution:
+
+1. **Economy depth:** real terrain yields, construction time, upkeep, refunds, storage, and additional buildings.
+2. **Save/load and application shell:** versioned saves, autosave, settings, and main menu—integrating the work already underway.
+3. **Population and production chains:** housing, workers, happiness, food upkeep, and resource conversion.
+4. **Units and exploration:** settlers, workers, scouts, military units, pathfinding, movement points, and fog of war.
+5. **Expansion:** founding and managing additional settlements.
+6. **Procedural maps:** seeded generation, map sizes, terrain density, and scenarios.
+7. **Combat and AI:** combat resolution, opponent expansion, unit production, defense, and attacks.
+8. **Research and diplomacy:** technology unlocks, eras, trade, and AI relations.
+9. **Victory and onboarding:** economic, military, and score victories, defeat states, tutorial, and difficulty settings.
+10. **Polish and release:** animation, effects, audio, optimization, exports, and compatibility testing.
+
+The Phase 1 renderer will reserve layers and asset conventions for units, fog of war, overlays, and future terrain types so those systems will not require another visual rewrite.
+
+**Next action:** toggle to **Act mode**, and I’ll begin with Phase 0.1, run the baseline, and then execute Phase 0 and Phase 1 in separately validated checkpoints.

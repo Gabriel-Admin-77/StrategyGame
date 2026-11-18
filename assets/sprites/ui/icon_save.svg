@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs>
+<linearGradient id="disk" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5d6f86"/><stop offset="100%" stop-color="#2f3c4c"/></linearGradient>
+</defs>
+<ellipse cx="32" cy="53" rx="20" ry="5" fill="#141b24" opacity="0.3"/>
+<rect x="10" y="9" width="44" height="46" rx="4" fill="url(#disk)"/>
+<rect x="10" y="9" width="44" height="46" rx="4" fill="none" stroke="#1c252f" stroke-width="2.5"/>
+<rect x="20" y="12" width="24" height="16" rx="2" fill="#cbd6df"/>
+<rect x="26" y="12" width="10" height="16" fill="#93a4b3"/>
+<rect x="18" y="34" width="28" height="18" rx="2" fill="#e9dcc0"/>
+<g stroke="#a8977a" stroke-width="2" stroke-linecap="round">
+<path d="M23 40 h18"/><path d="M23 46 h13"/>
+</g>
+<path d="M16 14 q4 -2 8 -2" stroke="#93a8bf" stroke-width="2.5" fill="none" opacity="0.6" stroke-linecap="round"/>
+</svg>

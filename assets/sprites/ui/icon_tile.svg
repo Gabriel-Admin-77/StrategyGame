@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs>
+<linearGradient id="pin" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f2d271"/><stop offset="100%" stop-color="#b8892c"/></linearGradient>
+</defs>
+<ellipse cx="32" cy="54" rx="12" ry="4" fill="#2a1c0e" opacity="0.3"/>
+<path d="M32 8 q16 0 16 16 q0 11 -16 26 q-16 -15 -16 -26 q0 -16 16 -16 z" fill="url(#pin)"/>
+<path d="M32 8 q16 0 16 16 q0 11 -16 26 q-16 -15 -16 -26 q0 -16 16 -16 z" fill="none" stroke="#7d5414" stroke-width="2.5"/>
+<circle cx="32" cy="24" r="7" fill="#fdf3cf"/>
+<circle cx="32" cy="24" r="7" fill="none" stroke="#a97c2a" stroke-width="2"/>
+<path d="M22 14 q6 -4 12 -3" stroke="#fff6d8" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+</svg>

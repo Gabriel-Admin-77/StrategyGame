@@ -1,0 +1,53 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/map/map.gd" id="1_map_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/top_bar.tscn" id="2_top_bar_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tile_info_panel.tscn" id="3_panel_scene"]
+[ext_resource type="Script" path="res://scripts/economy/resource_manager.gd" id="4_resource_script"]
+[ext_resource type="Script" path="res://scripts/turn/turn_manager.gd" id="5_turn_script"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/building_layer.tscn" id="6_building_layer_scene"]
+[ext_resource type="Script" path="res://scripts/core/save_manager.gd" id="7_save_script"]
+[ext_resource type="Script" path="res://scripts/core/strategy_camera.gd" id="8_camera_script"]
+[ext_resource type="Script" path="res://scripts/map/terrain_renderer.gd" id="9_terrain_script"]
+[ext_resource type="Script" path="res://scripts/map/selection_overlay.gd" id="10_overlay_script"]
+
+[node name="Map" type="Node2D"]
+script = ExtResource("1_map_script")
+
+[node name="StrategyCamera" type="Camera2D" parent="."]
+anchor_mode = 0
+script = ExtResource("8_camera_script")
+
+[node name="TerrainRenderer" type="Node2D" parent="."]
+script = ExtResource("9_terrain_script")
+
+[node name="BuildingLayer" parent="." instance=ExtResource("6_building_layer_scene")]
+
+[node name="SelectionOverlay" type="Node2D" parent="."]
+script = ExtResource("10_overlay_script")
+
+[node name="ResourceManager" type="Node" parent="."]
+script = ExtResource("4_resource_script")
+
+[node name="TurnManager" type="Node" parent="."]
+script = ExtResource("5_turn_script")
+
+[node name="SaveManager" type="Node" parent="."]
+script = ExtResource("7_save_script")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TopBar" parent="HUD" instance=ExtResource("2_top_bar_scene")]
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 8.0
+offset_right = -40.0
+offset_bottom = 78.0
+
+[node name="TileInfoPanel" parent="HUD" instance=ExtResource("3_panel_scene")]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_top = 86.0
+offset_right = -40.0
+offset_bottom = 386.0

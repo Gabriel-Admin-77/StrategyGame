@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs>
+<linearGradient id="bark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#c99b62"/><stop offset="100%" stop-color="#7b5229"/></linearGradient>
+</defs>
+<ellipse cx="32" cy="52" rx="24" ry="6" fill="#2a1c0e" opacity="0.25"/>
+<g transform="rotate(-18 32 32)">
+<rect x="8" y="22" width="44" height="20" rx="9" fill="url(#bark)"/>
+<ellipse cx="52" cy="32" rx="6" ry="10" fill="#dbb888"/>
+<ellipse cx="52" cy="32" rx="3" ry="5.5" fill="none" stroke="#a97c46" stroke-width="1.8"/>
+<path d="M16 27 q12 -3 26 -1" stroke="#e7c79a" stroke-width="2.5" fill="none" opacity="0.55" stroke-linecap="round"/>
+<path d="M20 38 q12 2 24 0" stroke="#5c3a1b" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+</g>
+</svg>

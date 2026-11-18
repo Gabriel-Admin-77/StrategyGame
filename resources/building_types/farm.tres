@@ -1,0 +1,19 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building_type.gd" id="1_building_type"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/building_farm.svg" id="2_art"]
+
+[resource]
+script = ExtResource("1_building_type")
+id = "farm"
+display_name = "Farm"
+description = "Cultivates the surrounding plains, feeding your growing settlement."
+short_code = "F"
+color = Color(0.86, 0.76, 0.24, 1)
+world_texture = ExtResource("2_art")
+ui_icon = ExtResource("2_art")
+visual_scale = 1.35
+allowed_terrain_names = PackedStringArray("Plains")
+cost = {"gold": 30, "wood": 20}
+production = {"food": 3}
+build_turns = 1

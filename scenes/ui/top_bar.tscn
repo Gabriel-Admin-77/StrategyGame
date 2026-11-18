@@ -1,0 +1,129 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/top_bar.gd" id="1_top_bar_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_turn.svg" id="2_icon_turn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_tile.svg" id="3_icon_tile"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_gold.svg" id="4_icon_gold"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_wood.svg" id="5_icon_wood"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_food.svg" id="6_icon_food"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_save.svg" id="7_icon_save"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_load.svg" id="8_icon_load"]
+
+[node name="TopBar" type="PanelContainer"]
+custom_minimum_size = Vector2(1040, 46)
+offset_right = 1040.0
+offset_bottom = 46.0
+script = ExtResource("1_top_bar_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TurnIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_icon_turn")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 4
+
+[node name="TurnLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Turn: 1"
+
+[node name="VSeparator1" type="VSeparator" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TileIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("3_icon_tile")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 4
+
+[node name="CoordLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Tile: None"
+
+[node name="VSeparator2" type="VSeparator" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="GoldIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_icon_gold")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 4
+
+[node name="GoldLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Gold: 100"
+
+[node name="WoodIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("5_icon_wood")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 4
+
+[node name="WoodLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Wood: 50"
+
+[node name="FoodIcon" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("6_icon_food")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 4
+
+[node name="FoodLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Food: 30"
+
+[node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
+
+[node name="SaveButton" type="Button" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(46, 30)
+layout_mode = 2
+tooltip_text = "Save the game state to disk."
+icon = ExtResource("7_icon_save")
+
+[node name="LoadButton" type="Button" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(46, 30)
+layout_mode = 2
+tooltip_text = "Load previously saved game state."
+icon = ExtResource("8_icon_load")
+
+[node name="EndTurnButton" type="Button" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(110, 30)
+layout_mode = 2
+text = "End Turn ▶"

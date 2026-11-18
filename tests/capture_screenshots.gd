@@ -1,0 +1,78 @@
+extends SceneTree
+
+## Captures windowed screenshots of the game for visual review.
+## Run WITHOUT --headless:
+##   Godot_v4.7.2-stable_win64_console.exe --path <project> \
+##       --script res://tests/capture_screenshots.gd --resolution 1120x820
+
+const MAP_OFFSET: Vector2 = Vector2(40.0, 56.0)
+const TILE_SIZE: float = 64.0
+const OUTPUT_DIR: String = "res://tests/screenshots"
+
+var _failures: int = 0
+
+
+func _init() -> void:
+	_capture()
+
+
+func _capture() -> void:
+	var main_scene: PackedScene = load("res://scenes/main/main.tscn")
+	if main_scene == null:
+		printerr("FAIL: main.tscn did not load")
+		quit(1)
+		return
+
+	var main = main_scene.instantiate()
+	root.add_child(main)
+	await process_frame
+	await process_frame
+
+	DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
+	await _save_frame("phase1_overview.png")
+
+	var map = main.get_node_or_null("Map")
+	if map == null:
+		printerr("FAIL: Map node missing")
+		quit(1)
+		return
+
+	var farm = load("res://resources/building_types/farm.tres")
+	var lumber_mill = load("res://resources/building_types/lumber_mill.tres")
+	var workshop = load("res://resources/building_types/workshop.tres")
+
+	map.place_building(Vector2i(0, 2), farm)
+	map.place_building(Vector2i(1, 2), lumber_mill)
+	map.place_building(Vector2i(2, 2), workshop)
+	map._handle_tile_click(Vector2(_tile_center(Vector2i(0, 2))))
+
+	await process_frame
+	await process_frame
+	await _save_frame("phase1_with_buildings.png")
+
+	if _failures == 0:
+		print("SCREENSHOTS SAVED TO ", OUTPUT_DIR)
+		quit(0)
+	else:
+		printerr("%d SCREENSHOT FAILURE(S)" % _failures)
+		quit(1)
+
+
+func _tile_center(coords: Vector2i) -> Vector2:
+	return MAP_OFFSET + Vector2(coords.x * TILE_SIZE + TILE_SIZE * 0.5, coords.y * TILE_SIZE + TILE_SIZE * 0.5)
+
+
+func _save_frame(file_name: String) -> void:
+	await RenderingServer.frame_post_draw
+	var image: Image = root.get_texture().get_image()
+	if image == null:
+		_failures += 1
+		printerr("FAIL: could not read viewport texture")
+		return
+	var path: String = OUTPUT_DIR.path_join(file_name)
+	var error: Error = image.save_png(path)
+	if error != OK:
+		_failures += 1
+		printerr("FAIL: save_png error %d for %s" % [error, path])
+	else:
+		print("saved ", path, " (", image.get_width(), "x", image.get_height(), ")")

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building_type.gd" id="1_building_type"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/building_workshop.svg" id="2_art"]
+
+[resource]
+script = ExtResource("1_building_type")
+id = "workshop"
+display_name = "Workshop"
+description = "Crafts tools and trade goods out of raw materials for a steady income."
+short_code = "W"
+color = Color(0.44, 0.56, 0.72, 1)
+world_texture = ExtResource("2_art")
+ui_icon = ExtResource("2_art")
+visual_scale = 1.35
+allowed_terrain_names = PackedStringArray("Plains", "Forest")
+cost = {"gold": 50, "wood": 40}
+production = {"gold": 3}
+build_turns = 1
