@@ -23,6 +23,7 @@ const COLOR_HINT_ERROR: Color = Color(0.95, 0.45, 0.42)
 
 var _button_group: ButtonGroup = ButtonGroup.new()
 var _demolish_button: Button = null
+var _is_auto_clearing: bool = false
 
 
 func _ready() -> void:
@@ -94,7 +95,8 @@ func _on_building_toggled(toggled_on: bool, building: BuildingType) -> void:
 		_show_hint("Placing %s (%s)" % [building.display_name, building.get_cost_text()], COLOR_HINT_SUCCESS)
 		building_mode_selected.emit(building)
 	elif _button_group.get_pressed_button() == null:
-		_reset_hint()
+		if not _is_auto_clearing:
+			_reset_hint()
 		build_mode_cleared.emit()
 
 
@@ -120,9 +122,21 @@ func show_status(_coords: Vector2i, reason: String) -> void:
 	_show_hint(reason, COLOR_HINT_ERROR)
 
 
-## Called by the map after a successful placement.
+## Called by the map after a successful placement. Automatically disarms build mode.
 func show_confirmation(coords: Vector2i, building: BuildingType) -> void:
+	_is_auto_clearing = true
+	clear_selection()
+	_is_auto_clearing = false
 	_show_hint("%s placed at (%d, %d)" % [building.display_name, coords.x, coords.y], COLOR_HINT_SUCCESS)
+
+
+## Clears any pressed building or demolish button and clears build mode.
+func clear_selection() -> void:
+	var pressed: Button = _button_group.get_pressed_button()
+	if pressed != null:
+		pressed.set_pressed(false)
+	_unpress_demolish_button()
+	build_mode_cleared.emit()
 
 
 func _reset_hint() -> void:

@@ -262,12 +262,16 @@ func place_building(coords: Vector2i, building: BuildingType) -> bool:
 	if not can_place_building(coords, building):
 		var err_msg: String = get_placement_error(coords, building)
 		placement_failed.emit(coords, err_msg)
+		if top_bar and top_bar.has_method("show_status_message"):
+			top_bar.show_status_message(err_msg, Color(0.95, 0.4, 0.4))
 		return false
 
 	if resource_manager:
 		if not resource_manager.can_afford(building.cost):
 			var err_msg: String = "Cannot afford %s (%s needed)." % [building.display_name, building.get_cost_text()]
 			placement_failed.emit(coords, err_msg)
+			if top_bar and top_bar.has_method("show_status_message"):
+				top_bar.show_status_message(err_msg, Color(0.95, 0.4, 0.4))
 			return false
 		resource_manager.spend_resources(building.cost)
 

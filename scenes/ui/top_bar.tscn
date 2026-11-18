@@ -112,18 +112,20 @@ theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="SaveButton" type="Button" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(46, 30)
+custom_minimum_size = Vector2(38, 32)
 layout_mode = 2
 tooltip_text = "Save the game state to disk."
 icon = ExtResource("7_icon_save")
+expand_icon = true
 
 [node name="LoadButton" type="Button" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(46, 30)
+custom_minimum_size = Vector2(38, 32)
 layout_mode = 2
 tooltip_text = "Load previously saved game state."
 icon = ExtResource("8_icon_load")
+expand_icon = true
 
 [node name="EndTurnButton" type="Button" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(110, 30)
+custom_minimum_size = Vector2(110, 32)
 layout_mode = 2
 text = "End Turn ▶"
