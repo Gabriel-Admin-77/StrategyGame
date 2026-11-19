@@ -1,0 +1,68 @@
+installation:
+  version: 6.12.4
+  installDate: 2026-11-19T14:19:10.440Z
+  lastUpdated: 2026-11-19T14:19:10.440Z
+  installShims: true
+modules:
+  - name: core
+    version: 6.12.4
+    installDate: 2026-11-19T14:19:07.826Z
+    lastUpdated: 2026-11-19T14:19:10.424Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: bmb
+    version: v2.2.2
+    installDate: 2026-11-19T14:19:08.059Z
+    lastUpdated: 2026-11-19T14:19:10.427Z
+    source: external
+    npmPackage: bmad-builder
+    repoUrl: https://github.com/bmad-code-org/bmad-builder
+    channel: stable
+    sha: 4a1422274a2acb0fb0ec0511753da6263948f072
+  - name: bmm
+    version: 6.12.4
+    installDate: 2026-11-19T14:19:08.397Z
+    lastUpdated: 2026-11-19T14:19:10.428Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: cis
+    version: v0.3.2
+    installDate: 2026-11-19T14:19:08.461Z
+    lastUpdated: 2026-11-19T14:19:10.430Z
+    source: external
+    npmPackage: bmad-creative-intelligence-suite
+    repoUrl: https://github.com/bmad-code-org/bmad-module-creative-intelligence-suite
+    channel: pinned
+    sha: 97298b22fee1c7e482710d3a8414adb5cfccccd9
+  - name: tea
+    version: v1.27.2
+    installDate: 2026-11-19T14:19:09.766Z
+    lastUpdated: 2026-11-19T14:19:10.433Z
+    source: external
+    npmPackage: bmad-method-test-architecture-enterprise
+    repoUrl: https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise
+    channel: pinned
+    sha: d99ad29c62697c152e3393351406686d5bcd323c
+  - name: gds
+    version: v0.7.2
+    installDate: 2026-11-19T14:19:10.226Z
+    lastUpdated: 2026-11-19T14:19:10.436Z
+    source: external
+    npmPackage: bmad-game-dev-studio
+    repoUrl: https://github.com/bmad-code-org/bmad-module-game-dev-studio.git
+    channel: stable
+    sha: 2486f5f5f3b8870baa6cee4615a870c0330f441c
+  - name: bmad-loop
+    version: v0.13.2
+    installDate: 2026-11-19T14:19:10.261Z
+    lastUpdated: 2026-11-19T14:19:10.440Z
+    source: external
+    npmPackage: null
+    repoUrl: https://github.com/bmad-code-org/bmad-loop
+    channel: stable
+    sha: 4a5c45390ff46c0fc28d316004ffe0ed7c8eea60
+ides:
+  - antigravity
+  - cline
