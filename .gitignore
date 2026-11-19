@@ -22,3 +22,7 @@ Thumbs.db
 desktop.ini
 *.tmp
 *.log
+.bmad-loop/runs/
+.bmad-loop/cache/
+.bmad-loop/policy.toml
+_bmad/render/
