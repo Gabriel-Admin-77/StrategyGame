@@ -54,7 +54,11 @@ func _run_test() -> void:
 		var texture = load(path)
 		_check(texture is Texture2D, "%s imports as a texture" % path.get_file())
 		if texture is Texture2D:
-			_check(texture.get_width() == 192, "%s is 192 px wide" % path.get_file())
+			_check(texture.get_width() == 192 and texture.get_height() == 192, "%s is 192x192 (got %dx%d)" % [path.get_file(), texture.get_width(), texture.get_height()])
+			if path.ends_with("_3d.png"):
+				var image: Image = texture.get_image()
+				_check(image != null and image.detect_alpha() != Image.ALPHA_NONE, "%s retains a transparent background" % path.get_file())
+				_check(image != null and image.has_mipmaps(), "%s imports with mipmaps" % path.get_file())
 
 	var icon_paths: Array[String] = [
 		"res://assets/sprites/ui/icon_gold.svg",
