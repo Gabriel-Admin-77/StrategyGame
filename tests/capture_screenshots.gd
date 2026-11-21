@@ -38,13 +38,26 @@ func _capture() -> void:
 		return
 
 	var farm = load("res://resources/building_types/farm.tres")
+	var house = load("res://resources/building_types/house.tres")
 	var lumber_mill = load("res://resources/building_types/lumber_mill.tres")
 	var workshop = load("res://resources/building_types/workshop.tres")
+	var market = load("res://resources/building_types/market.tres")
+	var dock = load("res://resources/building_types/dock.tres")
+	var mine = load("res://resources/building_types/mine.tres")
 
+	var res_mgr = map.get_node_or_null("ResourceManager")
+	if res_mgr:
+		res_mgr.base_capacity = {"gold": 9999, "wood": 9999, "food": 9999}
+		res_mgr.add_resources({"gold": 500, "wood": 500, "food": 500})
+
+	map.place_building(Vector2i(0, 0), mine)
 	map.place_building(Vector2i(0, 2), farm)
 	map.place_building(Vector2i(1, 2), lumber_mill)
-	map.place_building(Vector2i(2, 2), workshop)
-	map._handle_tile_click(Vector2(_tile_center(Vector2i(0, 2))))
+	map.place_building(Vector2i(2, 2), market)
+	map.place_building(Vector2i(3, 1), house)
+	map.place_building(Vector2i(3, 2), workshop)
+	map.place_building(Vector2i(4, 2), dock)
+	map._handle_tile_click(Vector2(_tile_center(Vector2i(2, 2))))
 
 	await process_frame
 	await process_frame

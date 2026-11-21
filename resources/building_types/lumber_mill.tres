@@ -1,7 +1,7 @@
 [gd_resource type="Resource" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/buildings/building_type.gd" id="1_building_type"]
-[ext_resource type="Texture2D" path="res://assets/sprites/buildings/building_lumber_mill.svg" id="2_art"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/building_lumber_mill_3d.png" id="2_art"]
 
 [resource]
 script = ExtResource("1_building_type")

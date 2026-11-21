@@ -46,6 +46,7 @@ func _run_test() -> void:
 
 	var building_paths: Array[String] = [
 		"res://assets/sprites/buildings/building_farm.svg",
+		"res://assets/sprites/buildings/building_house_3d.png",
 		"res://assets/sprites/buildings/building_lumber_mill.svg",
 		"res://assets/sprites/buildings/building_workshop.svg"
 	]
@@ -69,7 +70,7 @@ func _run_test() -> void:
 		_check(load(path) is Texture2D, "%s imports as a texture" % path.get_file())
 
 	# --- building resources reference art -----------------------------------
-	for id: String in ["farm", "lumber_mill", "workshop"]:
+	for id: String in ["farm", "house", "lumber_mill", "workshop"]:
 		var building = load("res://resources/building_types/%s.tres" % id)
 		_check(building != null and building.world_texture != null, "%s.tres has a painted world texture" % id)
 		_check(building != null and building.ui_icon != null, "%s.tres has a palette icon" % id)

@@ -9,7 +9,7 @@ licence requires it.
 | Asset | Source | Author | Licence |
 |---|---|---|---|
 | `icon.svg` | Godot Engine project template | Godot contributors | CC BY 4.0 |
-| `assets/sprites/terrain/*`, `assets/sprites/buildings/*`, `assets/sprites/ui/*`, `assets/sprites/fx/*` | Created for this project (programmatic painterly SVG) | StrategyGame project | Original work, project-owned |
+| `assets/sprites/terrain/*`, `assets/sprites/buildings/*`, `assets/sprites/ui/*`, `assets/sprites/fx/*` | Created for this project (programmatic painterly SVG and original Blender/Cycles renders) | StrategyGame project | Original work, project-owned |
 
 ## Fonts
 

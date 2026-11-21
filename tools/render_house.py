@@ -432,4 +432,139 @@ def build_details():
             )
 
 
-# --- CONTINUED BELOW ---
+def add_contact_shadow():
+    surface = bpy.data.materials.new("Soft transparent contact shadow")
+    surface.use_nodes = True
+    nodes = surface.node_tree.nodes
+    nodes.clear()
+    coordinates = nodes.new("ShaderNodeTexCoord")
+    center = nodes.new("ShaderNodeVectorMath")
+    center.operation = "SUBTRACT"
+    center.inputs[1].default_value = (0.5, 0.5, 0.0)
+    normalize = nodes.new("ShaderNodeVectorMath")
+    normalize.operation = "MULTIPLY"
+    normalize.inputs[1].default_value = (2.0, 2.0, 0.0)
+    distance = nodes.new("ShaderNodeVectorMath")
+    distance.operation = "LENGTH"
+    invert = nodes.new("ShaderNodeMath")
+    invert.operation = "SUBTRACT"
+    invert.inputs[0].default_value = 1.0
+    clamp = nodes.new("ShaderNodeMath")
+    clamp.operation = "MAXIMUM"
+    clamp.inputs[1].default_value = 0.0
+    falloff = nodes.new("ShaderNodeMath")
+    falloff.operation = "POWER"
+    falloff.inputs[1].default_value = 1.6
+    strength = nodes.new("ShaderNodeMath")
+    strength.operation = "MULTIPLY"
+    strength.inputs[1].default_value = 0.28
+    transparent = nodes.new("ShaderNodeBsdfTransparent")
+    diffuse = nodes.new("ShaderNodeBsdfDiffuse")
+    diffuse.inputs["Color"].default_value = (0.025, 0.03, 0.035, 1.0)
+    mix = nodes.new("ShaderNodeMixShader")
+    output = nodes.new("ShaderNodeOutputMaterial")
+    links = surface.node_tree.links
+    links.new(coordinates.outputs["Generated"], center.inputs[0])
+    links.new(center.outputs["Vector"], normalize.inputs[0])
+    links.new(normalize.outputs["Vector"], distance.inputs[0])
+    links.new(distance.outputs["Value"], invert.inputs[1])
+    links.new(invert.outputs[0], clamp.inputs[0])
+    links.new(clamp.outputs[0], falloff.inputs[0])
+    links.new(falloff.outputs[0], strength.inputs[0])
+    links.new(strength.outputs[0], mix.inputs[0])
+    links.new(transparent.outputs[0], mix.inputs[1])
+    links.new(diffuse.outputs[0], mix.inputs[2])
+    links.new(mix.outputs[0], output.inputs["Surface"])
+    bpy.ops.mesh.primitive_plane_add(size=1.0, location=(0.0, -0.18, -0.005))
+    shadow = bpy.context.object
+    shadow.name = "Local transparent contact shadow"
+    shadow.scale = (3.6, 2.7, 1.0)
+    shadow.data.materials.append(surface)
+    shadow["frame_asset"] = False
+    shadow.visible_shadow = False
+    shadow.visible_glossy = False
+    shadow.visible_transmission = False
+
+
+def configure_scene(options):
+    scene = bpy.context.scene
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = options.samples
+    scene.cycles.use_adaptive_sampling = True
+    scene.cycles.adaptive_threshold = 0.015
+    scene.cycles.use_denoising = True
+    scene.cycles.max_bounces = 8
+    scene.cycles.diffuse_bounces = 4
+    scene.cycles.glossy_bounces = 4
+    scene.render.resolution_x = options.master_size
+    scene.render.resolution_y = options.master_size
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = True
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.render.image_settings.color_depth = "8"
+    scene.view_settings.view_transform = "AgX"
+    try:
+        scene.view_settings.look = "AgX - Medium High Contrast"
+    except TypeError:
+        pass
+    scene.view_settings.exposure = 0.25
+
+    world = bpy.data.worlds.new("Soft blue ambient sky")
+    world.use_nodes = True
+    world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.35, 0.43, 0.58, 1.0)
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.35
+    scene.world = world
+
+    area_light("Large warm upper-left key", (-3.5, -4.5, 7.0), 700.0, (1.0, 0.87, 0.7), 4.0)
+    area_light("Cool soft fill", (4.0, -1.5, 4.5), 320.0, (0.68, 0.8, 1.0), 5.0)
+    area_light("Warm roof rim", (1.0, 4.0, 6.0), 550.0, (1.0, 0.9, 0.74), 3.5)
+
+    camera_data = bpy.data.cameras.new("Orthographic portrait camera")
+    camera_data.type = "ORTHO"
+    camera_data.ortho_scale = 4.2
+    camera = bpy.data.objects.new("Orthographic portrait camera", camera_data)
+    scene.collection.objects.link(camera)
+    camera.location = (5.2, -7.5, 5.4)
+    point_at(camera, (0.0, -0.15, 1.25))
+    scene.camera = camera
+    return scene, camera
+
+
+def main():
+    options = parse_arguments()
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.preferences.filepaths.save_version = 0
+    create_materials()
+    build_walls()
+    build_roof()
+    build_details()
+    scene, camera = configure_scene(options)
+
+    add_contact_shadow()
+    frame_camera(camera)
+
+    SOURCE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    MASTER_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    master_path = MASTER_DIRECTORY / ("building_house_3d_%d.png" % options.master_size)
+    blend_path = SOURCE_DIRECTORY / "building_house.blend"
+    scene.render.filepath = str(master_path)
+    bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
+    print("Rendering %d x %d house with %d Cycles samples" % (options.master_size, options.master_size, options.samples), flush=True)
+    bpy.ops.render.render(write_still=True)
+
+    master = bpy.data.images.load(str(master_path), check_existing=False)
+    master.scale(options.output_size, options.output_size)
+    master.filepath_raw = str(OUTPUT_PATH)
+    master.file_format = "PNG"
+    master.save()
+    bpy.data.images.remove(master)
+    print("EDITABLE SCENE: " + str(blend_path), flush=True)
+    print("FULL-SIZE MASTER: " + str(master_path), flush=True)
+    print("GODOT SPRITE: " + str(OUTPUT_PATH), flush=True)
+
+
+if __name__ == "__main__":
+    main()
