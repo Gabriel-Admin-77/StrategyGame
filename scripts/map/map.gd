@@ -106,11 +106,23 @@ var demolish_mode: bool = false
 @onready var save_manager: Node = get_node_or_null("SaveManager")
 @onready var terrain_renderer = get_node_or_null("TerrainRenderer")
 @onready var selection_overlay = get_node_or_null("SelectionOverlay")
+@onready var save_load_dialog: PanelContainer = get_node_or_null("HUD/SaveLoadDialog")
+@onready var settings_dialog: PanelContainer = get_node_or_null("HUD/SettingsDialog")
+@onready var pause_menu: PanelContainer = get_node_or_null("HUD/PauseMenu")
 
 
 func _ready() -> void:
 	_setup_system_connections()
 	_configure_visual_layers()
+	_check_startup_load()
+
+
+func _check_startup_load() -> void:
+	if Engine.has_meta("load_slot_on_start"):
+		var slot_to_load: String = str(Engine.get_meta("load_slot_on_start"))
+		Engine.remove_meta("load_slot_on_start")
+		if save_manager and save_manager.has_method("load_from_slot"):
+			save_manager.load_from_slot(slot_to_load)
 
 
 ## Hands the map to the painterly terrain renderer and the selection overlay
@@ -149,12 +161,47 @@ func _setup_system_connections() -> void:
 	if resource_manager and top_bar:
 		resource_manager.resources_updated.connect(top_bar.update_resources)
 
-	# 5. Connect Save & Load subsystems
-	if top_bar and save_manager:
+	# 5. Connect Save & Load subsystems and Modals
+	if top_bar:
 		if top_bar.has_signal("save_requested"):
-			top_bar.save_requested.connect(func(): save_manager.save_game())
+			top_bar.save_requested.connect(func():
+				if save_load_dialog and save_manager:
+					save_load_dialog.open(save_load_dialog.Mode.SAVE, save_manager)
+				elif save_manager:
+					save_manager.save_game()
+			)
 		if top_bar.has_signal("load_requested"):
-			top_bar.load_requested.connect(func(): save_manager.load_game())
+			top_bar.load_requested.connect(func():
+				if save_load_dialog and save_manager:
+					save_load_dialog.open(save_load_dialog.Mode.LOAD, save_manager)
+				elif save_manager:
+					save_manager.load_game()
+			)
+		if top_bar.has_signal("menu_requested"):
+			top_bar.menu_requested.connect(func():
+				if pause_menu:
+					pause_menu.open()
+			)
+
+	if pause_menu:
+		pause_menu.save_requested.connect(func():
+			if save_load_dialog and save_manager:
+				save_load_dialog.open(save_load_dialog.Mode.SAVE, save_manager)
+		)
+		pause_menu.load_requested.connect(func():
+			if save_load_dialog and save_manager:
+				save_load_dialog.open(save_load_dialog.Mode.LOAD, save_manager)
+		)
+		pause_menu.settings_requested.connect(func():
+			if settings_dialog:
+				settings_dialog.open()
+		)
+		pause_menu.main_menu_requested.connect(func():
+			get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+		)
+		pause_menu.quit_requested.connect(func():
+			get_tree().quit()
+		)
 
 	if save_manager and top_bar and top_bar.has_method("show_status_message"):
 		save_manager.game_saved.connect(func(_path: String): top_bar.show_status_message("Game Saved!", Color(0.4, 0.9, 0.4)))

@@ -170,11 +170,6 @@ func _run_tests() -> void:
 	# Since autosave and slot_1 exist, continue_button must be enabled!
 	_check(menu.continue_button.disabled == false, "ContinueButton is enabled when save files exist")
 
-	# Clean up instances
-	map.queue_free()
-	menu.queue_free()
-	await process_frame
-
 	# -------------------------------------------------------------------------
 	# 8. Clean up test files
 	# -------------------------------------------------------------------------
@@ -185,6 +180,11 @@ func _run_tests() -> void:
 
 	if FileAccess.file_exists(GameSettings.SETTINGS_FILE):
 		DirAccess.remove_absolute(GameSettings.SETTINGS_FILE)
+
+	# Clean up instances
+	map.queue_free()
+	menu.queue_free()
+	await process_frame
 
 	_finish()
 

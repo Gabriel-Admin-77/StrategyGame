@@ -1,11 +1,15 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+*.translation
 
 # Exported builds and packages
 /builds/
 /export/
 *.pck
+
+# Local tools
+Blender/
 
 # Local save data produced while playtesting
 /saves/*.json
