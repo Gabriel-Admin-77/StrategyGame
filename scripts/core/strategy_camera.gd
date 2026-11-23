@@ -12,18 +12,24 @@ signal camera_zoomed(new_zoom: Vector2)
 @export var drag_sensitivity: float = 1.0
 
 # Zoom configuration
-@export var min_zoom: float = 0.65
-@export var max_zoom: float = 1.75
+@export var min_zoom: float = 0.35
+@export var max_zoom: float = 2.0
 @export var zoom_step: float = 0.1
 @export var zoom_smoothness: float = 12.0
 
 # Camera limits (bounding box for camera origin)
 @export var limit_min: Vector2 = Vector2(-250.0, -200.0)
-@export var limit_max: Vector2 = Vector2(750.0, 600.0)
+@export var limit_max: Vector2 = Vector2(1750.0, 1700.0)
 
 var _target_zoom: Vector2 = Vector2.ONE
 var _is_dragging: bool = false
 var _previous_position: Vector2 = Vector2.ZERO
+
+
+## Configures camera panning boundaries based on the map bounding rect
+func configure_map_bounds(map_rect: Rect2, margin: Vector2 = Vector2(250.0, 200.0)) -> void:
+	limit_min = -margin
+	limit_max = map_rect.position + map_rect.size + margin - Vector2(200.0, 200.0)
 
 
 func _ready() -> void:

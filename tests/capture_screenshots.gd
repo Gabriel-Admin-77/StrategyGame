@@ -63,6 +63,16 @@ func _capture() -> void:
 	await process_frame
 	await _save_frame("phase1_with_buildings.png")
 
+	# Step 3: Zoomed out overview of the expansive 25x25 kingdom
+	var camera = map.get_node_or_null("StrategyCamera")
+	if camera:
+		camera.zoom = Vector2(0.48, 0.48)
+		camera._target_zoom = Vector2(0.48, 0.48)
+		camera.position = Vector2(180.0, 120.0)
+	await process_frame
+	await process_frame
+	await _save_frame("map_25x25_zoomed_out.png")
+
 	if _failures == 0:
 		print("SCREENSHOTS SAVED TO ", OUTPUT_DIR)
 		quit(0)
