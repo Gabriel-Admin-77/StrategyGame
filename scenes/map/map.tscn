@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/map.gd" id="1_map_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/top_bar.tscn" id="2_top_bar_scene"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="11_save_dialog"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_dialog.tscn" id="12_settings_dialog"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="13_pause_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/building_viewer_3d.tscn" id="14_viewer_scene"]
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_map_script")
@@ -62,4 +63,7 @@ visible = false
 visible = false
 
 [node name="PauseMenu" parent="HUD" instance=ExtResource("13_pause_menu")]
+visible = false
+
+[node name="BuildingViewer3D" parent="HUD" instance=ExtResource("14_viewer_scene")]
 visible = false

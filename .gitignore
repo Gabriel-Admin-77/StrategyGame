@@ -22,6 +22,8 @@ Blender/
 # Editor / OS noise
 .vscode/
 .idea/
+__pycache__/
+*.pyc
 Thumbs.db
 desktop.ini
 *.tmp

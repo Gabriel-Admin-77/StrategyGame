@@ -32,10 +32,17 @@ var _buildings: Dictionary = {}
 # Cached building illustrations, keyed by building id
 var _texture_cache: Dictionary = {}
 var _anim_time: float = 0.0
+var _zoom_3d_ratio: float = 0.0
 
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+
+
+func set_zoom_3d_ratio(ratio: float) -> void:
+	if not is_equal_approx(_zoom_3d_ratio, ratio):
+		_zoom_3d_ratio = ratio
+		queue_redraw()
 
 
 func _process(delta: float) -> void:
@@ -191,6 +198,15 @@ func _draw() -> void:
 				visual_size
 			)
 			visual_rect.position += building.visual_offset
+
+			# Dynamic 3D depth and ground shadow as zoom increases
+			if _zoom_3d_ratio > 0.05 and not under_construction:
+				var shadow_center: Vector2 = rect.get_center() + Vector2(6.0 * _zoom_3d_ratio, 8.0 * _zoom_3d_ratio)
+				var shadow_radius := Vector2(visual_size.x * 0.38, visual_size.y * 0.16)
+				_draw_oval(shadow_center, shadow_radius, Color(0.0, 0.0, 0.0, 0.38 * _zoom_3d_ratio))
+				# Physically elevate building upward along isometric axis
+				visual_rect.position.y -= _zoom_3d_ratio * 12.0
+
 			# Gentle water bobbing for docked boats
 			if building.id == "dock" and not under_construction:
 				visual_rect.position.y += sin(_anim_time * 2.4 + float(coords.x * 3 + coords.y * 5)) * 2.2
@@ -307,3 +323,12 @@ func _draw_dock_ripples(coords: Vector2i, visual_rect: Rect2, time: float) -> vo
 		var radius: float = 4.0 + phase * 10.0
 		var alpha: float = (1.0 - phase) * 0.35
 		draw_arc(water_pos, radius, 0.0, TAU, 12, Color(1.0, 1.0, 1.0, alpha), 1.5)
+
+
+func _draw_oval(center: Vector2, radius: Vector2, color: Color) -> void:
+	var points := PackedVector2Array()
+	var segments: int = 16
+	for i: int in range(segments):
+		var angle: float = float(i) * TAU / float(segments)
+		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
+	draw_colored_polygon(points, color)

@@ -82,6 +82,14 @@ func _capture() -> void:
 		await process_frame
 	await _save_frame("living_world_animated.png")
 
+	# Step 5: Real-time 3D Model Inspection Modal
+	var viewer = map.get_node_or_null("HUD/BuildingViewer3D")
+	if viewer:
+		viewer.open(farm)
+		for f in range(10):
+			await process_frame
+		await _save_frame("step_c_3d_inspection.png")
+
 	if _failures == 0:
 		print("SCREENSHOTS SAVED TO ", OUTPUT_DIR)
 		quit(0)

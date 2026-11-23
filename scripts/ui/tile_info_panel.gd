@@ -6,18 +6,25 @@ extends PanelContainer
 const BuildingType = preload("res://scripts/buildings/building_type.gd")
 const PaintedTheme = preload("res://scripts/ui/painted_theme.gd")
 
+signal view_3d_requested(building: BuildingType)
+
+var _inspected_building: BuildingType = null
+
 @onready var title_label: Label = get_node_or_null("MarginContainer/VBoxContainer/TitleLabel")
 @onready var coords_label: Label = get_node_or_null("MarginContainer/VBoxContainer/CoordsLabel")
 @onready var terrain_label: Label = get_node_or_null("MarginContainer/VBoxContainer/TerrainLabel")
 @onready var yield_label: Label = get_node_or_null("MarginContainer/VBoxContainer/YieldLabel")
 @onready var buildable_label: Label = get_node_or_null("MarginContainer/VBoxContainer/BuildableLabel")
 @onready var building_label: Label = get_node_or_null("MarginContainer/VBoxContainer/BuildingLabel")
+@onready var view_3d_button: Button = get_node_or_null("MarginContainer/VBoxContainer/View3DButton")
 @onready var hint_label: Label = get_node_or_null("MarginContainer/VBoxContainer/HintLabel")
 
 
 func _ready() -> void:
 	theme = PaintedTheme.get_theme()
 	_ensure_references()
+	if view_3d_button:
+		view_3d_button.pressed.connect(_on_view_3d_pressed)
 	reset_panel()
 
 
@@ -29,6 +36,7 @@ func _ensure_references() -> void:
 		yield_label = get_node_or_null("MarginContainer/VBoxContainer/YieldLabel")
 		buildable_label = get_node_or_null("MarginContainer/VBoxContainer/BuildableLabel")
 		building_label = get_node_or_null("MarginContainer/VBoxContainer/BuildingLabel")
+		view_3d_button = get_node_or_null("MarginContainer/VBoxContainer/View3DButton")
 		hint_label = get_node_or_null("MarginContainer/VBoxContainer/HintLabel")
 		title_label = get_node_or_null("MarginContainer/VBoxContainer/TitleLabel")
 
@@ -36,6 +44,9 @@ func _ensure_references() -> void:
 ## Resets the panel to default empty state
 func reset_panel() -> void:
 	_ensure_references()
+	_inspected_building = null
+	if view_3d_button:
+		view_3d_button.visible = false
 	if coords_label:
 		coords_label.text = "Coordinates: None"
 	if terrain_label:
@@ -75,6 +86,10 @@ func display_tile(coords: Vector2i, info: Dictionary, building_param: BuildingTy
 	if building == null and info.has("building"):
 		building = info["building"]
 
+	_inspected_building = building
+	if view_3d_button:
+		view_3d_button.visible = (building != null and building.get_model_3d() != null)
+
 	if building != null:
 		if building_label:
 			var construction_note: String = ""
@@ -101,3 +116,8 @@ func display_tile(coords: Vector2i, info: Dictionary, building_param: BuildingTy
 	if hint_label:
 		hint_label.text = info.get("description", "")
 		hint_label.modulate = Color(0.8, 0.8, 0.8)
+
+
+func _on_view_3d_pressed() -> void:
+	if _inspected_building != null:
+		view_3d_requested.emit(_inspected_building)

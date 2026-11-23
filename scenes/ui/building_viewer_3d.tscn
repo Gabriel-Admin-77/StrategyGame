@@ -1,0 +1,109 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/building_viewer_3d.gd" id="1_viewer_script"]
+
+[sub_resource type="World3D" id="World3D_1"]
+
+[node name="BuildingViewer3D" type="PanelContainer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -270.0
+offset_top = -250.0
+offset_right = 270.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_viewer_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Building - 3D View"
+horizontal_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Full 3D model with 360° inspection"
+horizontal_alignment = 1
+modulate = Color(0.8, 0.8, 0.8, 1)
+
+[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(508, 320)
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="MarginContainer/VBoxContainer/ViewportContainer"]
+own_world_3d = true
+world_3d = SubResource("World3D_1")
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(508, 320)
+render_target_update_mode = 3
+
+[node name="World" type="Node3D" parent="MarginContainer/VBoxContainer/ViewportContainer/SubViewport"]
+
+[node name="KeyLight" type="DirectionalLight3D" parent="MarginContainer/VBoxContainer/ViewportContainer/SubViewport/World"]
+transform = Transform3D(0.707107, -0.40558, 0.579228, 0, 0.819152, 0.573576, -0.707107, -0.40558, 0.579228, 0, 5, 0)
+light_energy = 2.4
+light_color = Color(1, 0.96, 0.9, 1)
+shadow_enabled = true
+
+[node name="FillLight" type="DirectionalLight3D" parent="MarginContainer/VBoxContainer/ViewportContainer/SubViewport/World"]
+transform = Transform3D(0.707107, 0.40558, -0.579228, 0, 0.819152, 0.573576, 0.707107, -0.40558, 0.579228, 0, 5, 0)
+light_energy = 0.85
+light_color = Color(0.75, 0.85, 1, 1)
+
+[node name="Camera3D" type="Camera3D" parent="MarginContainer/VBoxContainer/ViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 2.5, 4.6)
+fov = 40.0
+
+[node name="ModelAnchor" type="Node3D" parent="MarginContainer/VBoxContainer/ViewportContainer/SubViewport/World"]
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Footer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HintLabel" type="Label" parent="MarginContainer/VBoxContainer/Footer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Drag to rotate 360° | Wheel to zoom"
+modulate = Color(0.7, 0.7, 0.7, 1)
+
+[node name="AutoRotateButton" type="Button" parent="MarginContainer/VBoxContainer/Footer/HBox"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+text = "Auto-Rotate: ON"
+
+[node name="CloseButton" type="Button" parent="MarginContainer/VBoxContainer/Footer/HBox"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+text = "Close"

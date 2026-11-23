@@ -124,6 +124,7 @@ var demolish_mode: bool = false
 @onready var save_load_dialog: PanelContainer = get_node_or_null("HUD/SaveLoadDialog")
 @onready var settings_dialog: PanelContainer = get_node_or_null("HUD/SettingsDialog")
 @onready var pause_menu: PanelContainer = get_node_or_null("HUD/PauseMenu")
+@onready var building_viewer_3d: PanelContainer = get_node_or_null("HUD/BuildingViewer3D")
 
 
 func _ready() -> void:
@@ -152,8 +153,12 @@ func _configure_visual_layers() -> void:
 ## Connects subsystems together cleanly using Signals
 func _setup_system_connections() -> void:
 	var camera: Camera2D = get_node_or_null("StrategyCamera")
-	if camera and camera.has_method("configure_map_bounds"):
-		camera.configure_map_bounds(get_map_rect())
+	if camera:
+		if camera.has_method("configure_map_bounds"):
+			camera.configure_map_bounds(get_map_rect())
+		if camera.has_signal("zoom_3d_changed") and building_layer and building_layer.has_method("set_zoom_3d_ratio"):
+			camera.zoom_3d_changed.connect(building_layer.set_zoom_3d_ratio)
+			building_layer.set_zoom_3d_ratio(camera.get_3d_ratio())
 
 	if building_layer and building_layer.has_method("configure_grid"):
 		building_layer.configure_grid(MAP_OFFSET, TILE_SIZE)
@@ -161,6 +166,12 @@ func _setup_system_connections() -> void:
 	# 1. Connect tile selection signal to UI components
 	if tile_info_panel and tile_info_panel.has_method("display_tile"):
 		tile_selected.connect(tile_info_panel.display_tile)
+
+	if tile_info_panel and tile_info_panel.has_signal("view_3d_requested"):
+		tile_info_panel.view_3d_requested.connect(func(building: BuildingType):
+			if building_viewer_3d and building_viewer_3d.has_method("open"):
+				building_viewer_3d.open(building)
+		)
 
 	if top_bar and top_bar.has_method("update_coordinates"):
 		tile_selected.connect(top_bar.update_coordinates)

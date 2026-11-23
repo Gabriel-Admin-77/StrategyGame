@@ -6,6 +6,7 @@ extends Camera2D
 
 signal camera_moved(new_position: Vector2)
 signal camera_zoomed(new_zoom: Vector2)
+signal zoom_3d_changed(ratio: float)
 
 # Panning configuration
 @export var pan_speed: float = 450.0
@@ -24,6 +25,12 @@ signal camera_zoomed(new_zoom: Vector2)
 var _target_zoom: Vector2 = Vector2.ONE
 var _is_dragging: bool = false
 var _previous_position: Vector2 = Vector2.ZERO
+var _zoom_3d_ratio: float = 0.0
+
+
+## Returns the normalized 3D transition factor (0.0 = top-down 2D, 1.0 = close-up 3D)
+func get_3d_ratio() -> float:
+	return _zoom_3d_ratio
 
 
 ## Configures camera panning boundaries based on the map bounding rect
@@ -38,6 +45,14 @@ func _ready() -> void:
 	enabled = true
 	_target_zoom = zoom
 	_previous_position = position
+	_update_3d_transition()
+
+
+func _update_3d_transition() -> void:
+	var current_ratio: float = clampf((zoom.x - 0.7) / (max_zoom - 0.7), 0.0, 1.0)
+	if not is_equal_approx(_zoom_3d_ratio, current_ratio):
+		_zoom_3d_ratio = current_ratio
+		zoom_3d_changed.emit(_zoom_3d_ratio)
 
 
 func _process(delta: float) -> void:
@@ -74,6 +89,7 @@ func _handle_zoom_smoothing(delta: float) -> void:
 	if not zoom.is_equal_approx(_target_zoom):
 		zoom = zoom.lerp(_target_zoom, zoom_smoothness * delta)
 		camera_zoomed.emit(zoom)
+		_update_3d_transition()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -120,3 +136,4 @@ func reset_camera() -> void:
 	_previous_position = Vector2.ZERO
 	camera_moved.emit(position)
 	camera_zoomed.emit(zoom)
+	_update_3d_transition()

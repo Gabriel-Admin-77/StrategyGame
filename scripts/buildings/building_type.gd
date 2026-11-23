@@ -30,6 +30,20 @@ extends Resource
 @export var upkeep: Dictionary = {}
 ## Turns needed to finish construction (1 = instant).
 @export var build_turns: int = 1
+## 3D Model scene (PackedScene, e.g. .glb) for real-time 3D inspection and zoom transition.
+@export var model_3d: PackedScene = null
+
+
+## Resolves the 3D model for this building, with automatic fallback to assets/models/buildings/.
+func get_model_3d() -> PackedScene:
+	if model_3d != null:
+		return model_3d
+	var path: String = "res://assets/models/buildings/building_%s.glb" % id
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		if res is PackedScene:
+			return res
+	return null
 
 
 ## Returns true when this building may be placed on the given terrain name.
