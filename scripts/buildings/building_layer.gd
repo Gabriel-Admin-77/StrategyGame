@@ -6,6 +6,7 @@ extends Node2D
 ## the terrain grid.
 
 const BuildingType = preload("res://scripts/buildings/building_type.gd")
+const GameSettings = preload("res://scripts/core/game_settings.gd")
 
 signal building_placed(coords: Vector2i, building: BuildingType)
 signal building_removed(coords: Vector2i, building: BuildingType)
@@ -30,10 +31,18 @@ var _buildings: Dictionary = {}
 
 # Cached building illustrations, keyed by building id
 var _texture_cache: Dictionary = {}
+var _anim_time: float = 0.0
 
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+
+
+func _process(delta: float) -> void:
+	if _buildings.is_empty() or GameSettings.is_low_gfx():
+		return
+	_anim_time += delta
+	queue_redraw()
 
 
 ## Called by the map so both systems share the exact same grid geometry.
@@ -182,8 +191,16 @@ func _draw() -> void:
 				visual_size
 			)
 			visual_rect.position += building.visual_offset
+			# Gentle water bobbing for docked boats
+			if building.id == "dock" and not under_construction:
+				visual_rect.position.y += sin(_anim_time * 2.4 + float(coords.x * 3 + coords.y * 5)) * 2.2
+
 			var tint: Color = CONSTRUCTION_TINT if under_construction else Color.WHITE
 			draw_texture_rect(texture, visual_rect, false, tint)
+
+			# Living building ambient animations (smoke, forge glow, wheel splashes, etc.)
+			if not under_construction and not GameSettings.is_low_gfx():
+				_draw_building_ambience(building, coords, visual_rect)
 		else:
 			# Fallback marker when no illustration is available
 			var marker_color: Color = building.color
@@ -227,3 +244,66 @@ func _resolve_texture(building: BuildingType) -> Texture2D:
 			texture = resource
 	_texture_cache[key] = texture
 	return texture
+
+
+## Ambient living animations for completed buildings
+func _draw_building_ambience(building: BuildingType, coords: Vector2i, visual_rect: Rect2) -> void:
+	match building.id:
+		"farm":
+			_draw_chimney_smoke(coords, visual_rect, _anim_time, Vector2(visual_rect.size.x * 0.73, visual_rect.size.y * 0.16))
+		"house":
+			_draw_chimney_smoke(coords, visual_rect, _anim_time, Vector2(visual_rect.size.x * 0.68, visual_rect.size.y * 0.14))
+		"workshop":
+			_draw_chimney_smoke(coords, visual_rect, _anim_time, Vector2(visual_rect.size.x * 0.76, visual_rect.size.y * 0.12))
+			_draw_forge_glow(coords, visual_rect, _anim_time)
+		"lumber_mill":
+			_draw_waterwheel_splashes(coords, visual_rect, _anim_time)
+		"mine":
+			_draw_mine_glow(coords, visual_rect, _anim_time)
+		"dock":
+			_draw_dock_ripples(coords, visual_rect, _anim_time)
+
+
+func _draw_chimney_smoke(coords: Vector2i, visual_rect: Rect2, time: float, chimney_offset: Vector2) -> void:
+	var base_pos: Vector2 = visual_rect.position + chimney_offset
+	for i: int in range(3):
+		var phase: float = fmod(time * 0.75 + float(i) * 0.33 + float(coords.x * 7 + coords.y * 13) * 0.1, 1.0)
+		var rise: float = phase * 28.0
+		var drift: float = sin(time * 1.5 + phase * 3.0) * 4.0 + phase * 7.0
+		var puff_pos := Vector2(base_pos.x + drift, base_pos.y - rise)
+		var radius: float = 2.5 + phase * 5.5
+		var alpha: float = (1.0 - phase) * 0.4
+		draw_circle(puff_pos, radius, Color(0.92, 0.94, 0.98, alpha))
+
+
+func _draw_forge_glow(coords: Vector2i, visual_rect: Rect2, time: float) -> void:
+	var forge_pos: Vector2 = visual_rect.position + Vector2(visual_rect.size.x * 0.48, visual_rect.size.y * 0.72)
+	var pulse: float = 0.5 + 0.35 * sin(time * 5.5 + float(coords.x * 3 + coords.y * 2))
+	draw_circle(forge_pos, 8.0, Color(1.0, 0.45, 0.1, pulse * 0.35))
+	draw_circle(forge_pos, 4.0, Color(1.0, 0.85, 0.25, pulse * 0.7))
+
+
+func _draw_waterwheel_splashes(coords: Vector2i, visual_rect: Rect2, time: float) -> void:
+	var wheel_pos: Vector2 = visual_rect.position + Vector2(visual_rect.size.x * 0.2, visual_rect.size.y * 0.82)
+	for s: int in range(3):
+		var phase: float = fmod(time * 3.5 + float(s) * 0.33 + float(coords.x), 1.0)
+		var spray_x: float = cos(phase * PI) * 5.0 - 2.0
+		var spray_y: float = -sin(phase * PI) * 6.5
+		var alpha: float = (1.0 - phase) * 0.55
+		draw_circle(wheel_pos + Vector2(spray_x, spray_y), 1.6, Color(0.85, 0.95, 1.0, alpha))
+
+
+func _draw_mine_glow(coords: Vector2i, visual_rect: Rect2, time: float) -> void:
+	var entrance_pos: Vector2 = visual_rect.position + Vector2(visual_rect.size.x * 0.48, visual_rect.size.y * 0.6)
+	var flicker: float = 0.4 + 0.25 * sin(time * 7.5 + float(coords.y * 4)) + 0.1 * sin(time * 17.0)
+	draw_circle(entrance_pos, 6.0, Color(1.0, 0.78, 0.2, flicker * 0.35))
+	draw_circle(entrance_pos, 2.5, Color(1.0, 0.95, 0.5, flicker * 0.75))
+
+
+func _draw_dock_ripples(coords: Vector2i, visual_rect: Rect2, time: float) -> void:
+	var water_pos: Vector2 = visual_rect.position + Vector2(visual_rect.size.x * 0.72, visual_rect.size.y * 0.85)
+	for r: int in range(2):
+		var phase: float = fmod(time * 1.5 + float(r) * 0.5 + float(coords.x), 1.0)
+		var radius: float = 4.0 + phase * 10.0
+		var alpha: float = (1.0 - phase) * 0.35
+		draw_arc(water_pos, radius, 0.0, TAU, 12, Color(1.0, 1.0, 1.0, alpha), 1.5)

@@ -73,6 +73,15 @@ func _capture() -> void:
 	await process_frame
 	await _save_frame("map_25x25_zoomed_out.png")
 
+	# Step 4: Zoomed-in detailed living world view showing smoke, glow, and water ripple animations
+	if camera:
+		camera.zoom = Vector2(1.5, 1.5)
+		camera._target_zoom = Vector2(1.5, 1.5)
+		camera.position = Vector2(40.0, 60.0)
+	for f in range(12):
+		await process_frame
+	await _save_frame("living_world_animated.png")
+
 	if _failures == 0:
 		print("SCREENSHOTS SAVED TO ", OUTPUT_DIR)
 		quit(0)
